@@ -1,262 +1,200 @@
 # 🚁 Causal Decision Transformer
 
-A causal reasoning-based aerial combat decision agent training framework that combines Decision Transformer and Causal Graph Networks for intelligent decision-making in complex multi-task aerial combat environments.
+Language: English | [Deutsch](README.de.md)
 
-## 🚀 Key Features
+A causal reasoning–based aerial combat decision agent framework that combines Decision Transformer and Causal Graph Networks for robust, explainable decision-making in complex multi-task scenarios.
 
-- **Causal Reasoning Enhancement**: Integrated causal graph networks supporting multi-level and temporal causal relationship modeling
-- **Counterfactual Decision Making**: Evaluate potential impacts of different decisions through counterfactual reasoning
-- **Multi-Task Learning**: Support multi-task coordinated decision-making in complex aerial combat scenarios
-- **Adaptive Training**: Multi-stage training strategy (exploration-refinement-exploitation)
-- **Uncertainty Estimation**: Built-in uncertainty quantification and adaptive exploration mechanisms
-- **Real-Time Simulation**: High-fidelity aerial combat simulation environment based on Harfang 3D engine
+## ✨ Key Features
+- Causal reasoning with multi-level and temporal causal matrices
+- Counterfactual decision-making via soft interventions
+- Multi-task coordination for air-combat skills and strategies
+- Adaptive training phases (exploration → refinement → exploitation)
+- Uncertainty estimation with adaptive exploration
+- Integrated simulation with `gym_dogfight` (Harfang 3D)
 
-## 📋 目录结构
-
+## 📁 Project Structure
 ```
 odt/
-├── decision_transformer/          # 决策转换器核心模块
+├── README.md                # English documentation (language switch on top)
+├── README.de.md             # German documentation (mirror)
+├── main.py                  # Entry point and experiment runner
+├── causal_dt_trainer.py     # Causal sequence trainer
+├── trainer.py               # Base trainer
+├── evaluation.py            # Evaluation utilities
+├── data.py                  # Dataset loading and processing
+├── decision_transformer/
 │   └── models/
-│       ├── decision_transformer.py    # 主模型实现
-│       ├── causal_graph.py           # 因果图网络
-│       ├── causal_trainer.py         # 因果训练器
-│       └── model.py                  # 基础模型组件
-├── gym_dogfight/                 # 空战仿真环境
-│   ├── envs/dogfightEnv/        # 环境实现
-│   └── spaces/                   # 动作和状态空间定义
-├── causal_dt_trainer.py          # 因果序列训练器
-├── main.py                       # 主训练脚本
-├── trainer.py                    # 标准训练器
-├── evaluation.py                 # 评估模块
-└── data.py                       # 数据处理模块
+│       ├── model.py         # Core model components
+│       ├── causal_graph.py  # Causal Graph and Counterfactual modules
+│       └── lora.py          # Optional LoRA adapter
+├── gym_dogfight/            # Simulation environment
+├── data/                    # Training datasets
+└── collected_data/          # Collected trajectories
 ```
 
-## 🛠️ 安装要求
+## 🛠️ Installation
 
-### 系统要求
+### Requirements
 - Python 3.8+
-- CUDA 11.0+ (推荐使用GPU)
-- Windows/Linux
+- PyTorch 1.8+
+- CUDA 11+ (optional)
 
-### 依赖安装
-
-1. **克隆项目**
+### Setup
 ```bash
+# Clone the project
 git clone <repository-url>
 cd odt
-```
 
-2. **安装Python依赖**
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-pip install transformers==4.5.1
-pip install tensorboardX
-pip install numpy scipy matplotlib
-pip install scikit-learn networkx
-pip install harfang
-```
+# Core dependencies
+pip install torch torchvision torchaudio
+pip install numpy pandas matplotlib seaborn
+pip install networkx scikit-learn
 
-3. **安装仿真环境**
-```bash
+# Install local gym environment
+pip install -e .
+
+# Optional: transformers (local copy)
+cd transformers-4.5.1
 pip install -e .
 ```
 
-## 🎯 快速开始
+## 🚀 Quick Start
 
-### 1. 数据准备
-
-确保在 `collected_data/` 目录下有训练数据文件：
+### 1) Data Preparation
+```bash
+python data.py --data_path ./data/episodes_*.pkl
+# or
+python load_data_test.py
 ```
-collected_data/
-└── episodes_20250915-102016.pkl
-```
 
-### 2. 基础训练
-
+### 2) Baseline Training (Decision Transformer)
 ```bash
 python main.py \
-    --env data_collection-v0 \
-    --online_env onevsone_ap-v0 \
-    --K 20 \
-    --embed_dim 512 \
-    --n_layer 4 \
-    --n_head 4 \
-    --batch_size 32 \
-    --learning_rate 1e-4 \
-    --max_pretrain_iters 2 \
-    --max_online_iters 1500
+  --env dogfight \
+  --dataset ./data/episodes_20250731-000040.pkl \
+  --model_type dt \
+  --embed_dim 128 \
+  --n_layer 3 \
+  --n_head 1 \
+  --activation_function relu \
+  --dropout 0.1 \
+  --learning_rate 1e-4 \
+  --weight_decay 1e-4 \
+  --warmup_steps 10000 \
+  --num_eval_episodes 100 \
+  --max_iters 20 \
+  --num_steps_per_iter 10000 \
+  --device cuda \
+  --log_to_wandb True
 ```
 
-### 3. 因果增强训练
-
-启用因果图网络和反事实决策：
+### 3) Causal‑Enhanced Training
 ```bash
 python main.py \
-    --use_causal_graph True \
-    --num_tasks 5 \
-    --causal_discovery_method pc \
-    --sparsity_weight 0.1 \
-    --consistency_weight 0.2
+  --env dogfight \
+  --dataset ./data/episodes_20250731-000040.pkl \
+  --model_type causal_dt \
+  --embed_dim 128 \
+  --n_layer 3 \
+  --n_head 1 \
+  --causal_discovery_method pc \
+  --sparsity_weight 0.01 \
+  --consistency_weight 0.1 \
+  --learning_rate 1e-4 \
+  --max_iters 50 \
+  --device cuda
 ```
 
-### 4. 评估模型
-
+### 4) Evaluation
 ```bash
 python evaluation.py \
-    --model_path ./exp/model.pt \
-    --num_eval_episodes 10 \
-    --eval_rtg 3600
+  --model_path ./models/causal_dt_model.pt \
+  --env dogfight \
+  --num_eval_episodes 100 \
+  --render True
 ```
 
-## 🧠 技术架构
+## 🏗️ Technical Architecture
+- Decision Transformer: sequence model (states/actions/rewards/returns) with causal integration
+- CausalGraph: parameterized multi-level and temporal causal matrices; soft interventions
+- CounterfactualDecisionMaker: decision fusion with uncertainty-guided adaptive exploration
+- CausalTrainer: statistics update, structure learning (PC/Granger/score), counterfactual training, visualization
 
-### 核心组件
+## 📈 Training Workflow
+1. Preprocess trajectories and extract features
+2. Learn causal structure from transitions and outcomes
+3. Train with sequence loss, consistency and diversity constraints, sparsity regularization
+4. Adapt via LR scheduling, dynamic weights, and phase switching
 
-#### 1. 决策转换器 (DecisionTransformer)
-- 基于 GPT-2 架构的序列建模
-- 支持状态-动作-奖励-回报的联合建模
-- 集成随机策略和温度调节机制
-
-#### 2. 因果图网络 (CausalGraph)
-- **多层次因果矩阵**: 建模不同抽象层次的任务关系
-- **时序因果建模**: 捕获延迟因果效应
-- **注意力融合**: 使用多头注意力整合因果影响
-
-#### 3. 反事实决策模块 (CounterfactualDecisionMaker)
-- **软干预**: 对任务分布进行可控强度的干预
-- **不确定性估计**: 基于熵的不确定性量化
-- **自适应探索**: 根据不确定性动态调整探索策略
-
-#### 4. 因果训练器 (CausalTrainer)
-- **结构学习**: 支持 PC、Granger、评分等因果发现算法
-- **反事实训练**: 多样性约束和一致性正则化
-- **自适应策略**: 多阶段训练和动态权重调整
-
-### 训练流程
-
-```mermaid
-graph TD
-    A[轨迹数据] --> B[因果统计更新]
-    B --> C[因果结构学习]
-    C --> D[反事实推理训练]
-    D --> E[损失计算]
-    E --> F[模型更新]
-    F --> G[评估与可视化]
-    G --> B
-```
-
-## 📊 实验配置
-
-### 模型参数
-- **序列长度**: K=20
-- **嵌入维度**: 512
-- **Transformer层数**: 4
-- **注意力头数**: 4
-- **批次大小**: 32
-
-### 训练参数
-- **学习率**: 1e-4
-- **权重衰减**: 5e-4
-- **预训练轮数**: 2
-- **在线训练轮数**: 1500
-- **评估间隔**: 10
-
-### 因果参数
-- **任务数量**: 5
-- **稀疏性权重**: 0.1
-- **一致性权重**: 0.2
-- **干预强度**: 0.8-1.0
-
-## 📈 性能监控
-
-### TensorBoard 可视化
-```bash
-tensorboard --logdir ./exp/logs
-```
-
-### 关键指标
-- **任务准确率**: 多任务分类性能
-- **反事实多样性**: 不同干预的效果差异
-- **因果稀疏度**: 学习到的因果结构复杂度
-- **不确定性校准**: 不确定性与预测错误的相关性
-
-## 🔧 高级配置
-
-### 环境配置
+## ⚙️ Configuration Examples
 ```python
-# 仿真服务器配置
---host 172.27.240.1
---port 57805
+MODEL_CONFIG = {
+  'embed_dim': 128,
+  'n_layer': 3,
+  'n_head': 1,
+  'activation_function': 'relu',
+  'dropout': 0.1,
+  'max_length': 20,
+}
 
-# 环境参数
---env data_collection-v0      # 数据收集环境
---online_env onevsone_ap-v0   # 在线训练环境
+TRAINING_CONFIG = {
+  'learning_rate': 1e-4,
+  'weight_decay': 1e-4,
+  'warmup_steps': 10000,
+  'max_iters': 50,
+  'batch_size': 64,
+  'num_steps_per_iter': 10000,
+}
+
+CAUSAL_CONFIG = {
+  'causal_discovery_method': 'pc',  # pc, granger, score_based
+  'sparsity_weight': 0.01,
+  'consistency_weight': 0.1,
+  'intervention_strength': 0.5,
+  'uncertainty_threshold': 0.3,
+}
 ```
 
-### 因果发现方法
-- `pc`: PC算法启发式实现
-- `granger`: Granger因果性
-- `score`: 基于互信息的评分方法
+## 📊 Monitoring
+- Task prediction accuracy
+- Causal structure change
+- Counterfactual diversity
+- Decision consistency and uncertainty calibration
 
-### 训练阶段
-- `initial`: 初始结构学习阶段
-- `refinement`: 精炼阶段
-- `exploitation`: 利用阶段
+Visualization:
+```python
+trainer.visualize_causal_graph(save_path='./figures/')
+```
 
-## 🐛 故障排除
+## 🔧 Advanced
+- Custom causal discovery via callback (`trainer.causal_discovery_method = your_fn`)
+- Multi‑environment training loops
+- Distributed training (`torch.distributed.launch`)
 
-### 常见问题
+## 🐛 Troubleshooting
+- CUDA OOM: reduce `--batch_size`, use gradient accumulation
+- Causal matrices not converging: tune `--sparsity_weight` / `--consistency_weight`
+- Unstable runs: lower LR, increase `--warmup_steps`
 
-1. **CUDA内存不足**
-   ```bash
-   # 减少批次大小
-   --batch_size 16
-   
-   # 或使用CPU训练
-   --device cpu
-   ```
-
-2. **仿真连接失败**
-   ```bash
-   # 检查服务器地址和端口
-   --host <your_server_ip>
-   --port <your_server_port>
-   ```
-
-3. **数据加载错误**
-   ```bash
-   # 确保数据文件路径正确
-   # 检查 main.py 中的 loc 变量
-   ```
-
-## 📚 相关论文
-
+## 📚 References
 - Decision Transformer: Reinforcement Learning via Sequence Modeling
-- Causal Reasoning in Deep Reinforcement Learning
-- Counterfactual Multi-Agent Policy Gradients
+- Causal Discovery in Machine Learning: Theory and Applications
+- Counterfactual Reasoning for Decision Making under Uncertainty
 
-## 🤝 贡献指南
+## 🤝 Contributing
+1. Fork
+2. Feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit (`git commit -m 'Add some AmazingFeature'`)
+4. Push (`git push origin feature/AmazingFeature`)
+5. Open PR
 
-1. Fork 项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+## 📄 License
+MIT License — see `LICENSE`.
 
-## 📄 许可证
+## 👥 Authors
+- **bafs** — initial work — [GitHub](https://github.com/bafs)
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 👥 作者
-
-- **bafs** - *初始工作* - [GitHub](https://github.com/bafs)
-
-## 🙏 致谢
-
-- Harfang 3D 引擎团队
-- Transformers 库开发者
-- 空战仿真社区的贡献者
-
----
-
-**注意**: 本项目仅用于研究和教育目的。请确保在合法合规的框架内使用。
+## 🙏 Acknowledgments
+- Inspiration from Decision Transformer
+- Thanks to gym_dogfight
+- Thanks to the open‑source community
