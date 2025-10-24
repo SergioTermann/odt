@@ -1,15 +1,15 @@
-# 因果决策转换器 (Causal Decision Transformer)
+# 🚁 Causal Decision Transformer
 
-基于因果推理的空战决策智能体训练框架，结合了决策转换器 (Decision Transformer) 和因果图网络，用于复杂多任务空战环境中的智能决策。
+A causal reasoning-based aerial combat decision agent training framework that combines Decision Transformer and Causal Graph Networks for intelligent decision-making in complex multi-task aerial combat environments.
 
-## 🚀 项目特色
+## 🚀 Key Features
 
-- **因果推理增强**: 集成因果图网络，支持多层次和时序因果关系建模
-- **反事实决策**: 通过反事实推理评估不同决策的潜在影响
-- **多任务学习**: 支持复杂空战场景中的多任务协调决策
-- **自适应训练**: 多阶段训练策略（探索-精炼-利用）
-- **不确定性估计**: 内置不确定性量化和自适应探索机制
-- **实时仿真**: 基于 Harfang 3D 引擎的高保真空战仿真环境
+- **Causal Reasoning Enhancement**: Integrated causal graph networks supporting multi-level and temporal causal relationship modeling
+- **Counterfactual Decision Making**: Evaluate potential impacts of different decisions through counterfactual reasoning
+- **Multi-Task Learning**: Support multi-task coordinated decision-making in complex aerial combat scenarios
+- **Adaptive Training**: Multi-stage training strategy (exploration-refinement-exploitation)
+- **Uncertainty Estimation**: Built-in uncertainty quantification and adaptive exploration mechanisms
+- **Real-Time Simulation**: High-fidelity aerial combat simulation environment based on Harfang 3D engine
 
 ## 📋 目录结构
 
