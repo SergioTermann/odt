@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: gym_dogfight
+Version: 0.1.0
+Summary: A gym environment for dogfight simulation
+Author: bafs
+Requires-Dist: numpy
+Requires-Dist: harfang
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: summary
